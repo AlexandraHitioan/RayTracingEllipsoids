@@ -1,4 +1,4 @@
-﻿namespace rt
+﻿namespace RayTracingWithEllipsoids
 {
     public class Camera
     {
@@ -9,8 +9,7 @@
         public double ViewPlaneDistance { get; set; }
         public double ViewPlaneWidth { get; set; }
         public double ViewPlaneHeight { get; set; }
-        public Vector SemiAxes { get; set; } //newly added property, to help it work with the ellipsoid class (Look for further explanation when it's all done)
-        
+        public Vector SemiAxes { get; set; } 
         public double FrontPlaneDistance { get; set; }
         public double BackPlaneDistance { get; set; }
 
@@ -24,7 +23,7 @@
             ViewPlaneHeight = viewPlaneHeight;
             FrontPlaneDistance = frontPlaneDistance;
             BackPlaneDistance = backPlaneDistance;
-            SemiAxes = semiAxes; // Initialize the SemiAxes property
+            SemiAxes = semiAxes; 
         }
 
         public void Normalize()

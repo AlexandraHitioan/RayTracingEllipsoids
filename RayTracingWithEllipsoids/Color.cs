@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace rt
+namespace RayTracingWithEllipsoids
 {
-    public class Color
+  public class Color
     {
         public static Color RED =     new Color(1.0, 0.0, 0.0, 1.0); 
         public static Color GREEN =   new Color(0.0, 1.0, 0.0, 1.0); 

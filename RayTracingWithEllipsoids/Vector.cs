@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace rt
+namespace RayTracingWithEllipsoids
 {
     public class Vector
     {
@@ -89,16 +89,13 @@ namespace rt
 
         public Vector Normalize()
         {
-            //TODO: Adapt this one for Ellipsoid
-           //calculam lungimea vectorului
-            double length = Math.Sqrt(X * X + Y * Y + Z * Z);
+            double length = Math.Sqrt(X * X + Y * Y + Z * Z); //determine vector length
             
             if (length > 0.0)
             {
-                //calculam valoarea normala pentru vector
                 X /= length;
                 Y /= length;
-                Z /= length;
+                Z /= length; //turn vector into normal
             }
 
             return this;

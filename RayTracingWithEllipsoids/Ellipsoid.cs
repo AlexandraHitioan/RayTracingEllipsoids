@@ -1,7 +1,4 @@
-﻿using System;
-
-
-namespace rt
+﻿namespace RayTracingWithEllipsoids
 {
     public class Ellipsoid : Geometry
     {
@@ -17,6 +14,13 @@ namespace rt
             Radius = radius;
         }
 
+        public Ellipsoid(Vector center, double radius, Material material, Color color) : base(material, color)
+        {
+            Center = center;
+            Radius = radius;
+            SemiAxesLength = new Vector(1,1,1);
+        }
+        
         public Ellipsoid(Vector center, Vector semiAxesLength, double radius, Color color) : base(color)
         {
             Center = center;
@@ -24,106 +28,91 @@ namespace rt
             Radius = radius;
         }
 
-        public override Intersection GetIntersection(Line ray, double minDist, double maxDist)
+        public Ellipsoid(Material material, Color color) : base(material,color)
         {
-            //TODO
-            // Translate the ray into ellipsoid's local coordinate system
-            Vector localRayOrigin = ray.X0 - Center;
-            Vector localRayDirection = ray.Dx;
-
-            // Calculate coefficients of the intersection equation
-            double a = SemiAxesLength.X * SemiAxesLength.X;
-            double b = SemiAxesLength.Y * SemiAxesLength.Y;
-            double c = SemiAxesLength.Z * SemiAxesLength.Z;
-
-            double dx = localRayDirection.X;
-            double dy = localRayDirection.Y;
-            double dz = localRayDirection.Z;
-
-            double A = a * dx * dx + b * dy * dy + c * dz * dz;
-            double B = 2 * (a * localRayOrigin.X * dx + b * localRayOrigin.Y * dy + c * localRayOrigin.Z * dz);
-            double C = a * localRayOrigin.X * localRayOrigin.X + b * localRayOrigin.Y * localRayOrigin.Y + c * localRayOrigin.Z * localRayOrigin.Z - Radius * Radius;
-
-            // Solve the quadratic equation
-            double discriminant = B * B - 4 * A * C;
-
-            if (discriminant < 0)
-            {
-                // No real intersections
-                return new Intersection();
-            }
-
-            // Calculate the t values for intersections
-            double t1 = (-B - Math.Sqrt(discriminant)) / (2 * A);
-            double t2 = (-B + Math.Sqrt(discriminant)) / (2 * A);
-
-            Intersection intersection1 = null;
-            Intersection intersection2 = null;
-
-            if (t1 >= minDist && t1 <= maxDist)
-            {
-                // t1 is a valid intersection
-                Vector intersectionPoint = localRayOrigin + localRayDirection * t1;
-                Vector normal = Normal(intersectionPoint);
-
-                intersection1 = new Intersection(true, true, this, ray, t1, intersectionPoint);
-            }
-
-            if (t2 >= minDist && t2 <= maxDist)
-            {
-                // t2 is a valid intersection
-                Vector intersectionPoint = localRayOrigin + localRayDirection * t2;
-                Vector normal = Normal(intersectionPoint);
-
-                intersection2 = new Intersection(true, true, this, ray, t2, intersectionPoint);
-            }
-
-            if (intersection1 != null && intersection2 != null)
-            {
-                // Both intersections are valid; return the one closest to the ray origin
-                if (intersection1.T < intersection2.T)
-                {
-                    return intersection1;
-                }
-                else
-                {
-                    return intersection2;
-                }
-            }
-            else if (intersection1 != null)
-            {
-                return intersection1;
-            }
-            else if (intersection2 != null)
-            {
-                return intersection2;
-            }
-            else
-            {
-                // No valid intersections within the specified range
-                return new Intersection();
-            }
+            Material = material;
+            Color = color;
         }
-        public Vector Normal(Vector v)
+        
+        public override Intersection GetIntersection(Line line, double minDist, double maxDist)
         { 
-            //todo implement the Normal function
-            // Calculate the normalized gradient of the ellipsoid's surface equation
-            double a2 = SemiAxesLength.X * SemiAxesLength.X;
-            double b2 = SemiAxesLength.Y * SemiAxesLength.Y;
-            double c2 = SemiAxesLength.Z * SemiAxesLength.Z;
+            //ADD CODE HERE
+            var a = SemiAxesLength.X; 
+            var b = SemiAxesLength.Y; 
+            var c = SemiAxesLength.Z; //corespondent semi-axes coodrinates for the main axes x,y,z
+            var cX = Center.X; 
+            var cY = Center.Y;
+            var cZ = Center.Z; // x,y,z coordinates of the ellipsoid's center
+            
+            var a2 = a * a;
+            var b2 = b * b;
+            var c2 = c * c; //coefficients od the Ellipsoid equation
+            
+            var x0 = line.X0.X;
+            var y0 = line.X0.Y;
+            var z0 = line.X0.Z; //coordinates x,y,z of the X0 point of 'line' (ray of light)
+        
+            var dx = line.Dx.X;
+            var dy = line.Dx.Y;
+            var dz = line.Dx.Z; //coordinates x,y,z of the direction vector of 'line'
+            
+            var aE = dx * dx / a2 + dy * dy / b2 + dz * dz / c2;
+            var bE = 2.0 * ((x0 - cX) * dx / a2 + (y0 - cY)* dy / b2 + (z0 - cZ) * dz / c2);
+            var cE = (x0 - cX) * (x0 - cX) / a2 + (y0 - cY) * (y0 - cY) / b2 + (z0 - cZ) * (z0 - cZ) / c2 -Radius*Radius; //coefficients of quadratic equation
+            var delta = bE * bE - 4 * aE * cE; //the discriminant for the equation
+            if (delta < 0.001) //there are no valid solutions -> no intersection
+            {
+                return new Intersection(false, false, this, line, 0, new Vector(0, 0, 0));
+            }
+            var sol1 = (-bE - Math.Sqrt(delta)) / (2.0 * aE);
+            var sol2 = (-bE + Math.Sqrt(delta)) / (2.0 * aE);
+            var t1A = sol1 >= minDist && sol1 <= maxDist;
+            var t2A = sol2>= minDist && sol2 <= maxDist;
+            
+            if (!(sol1 >= minDist && sol1 <= maxDist)&& !(sol2>= minDist && sol2 <= maxDist)) //none of the solutions is valid
+            {
+                return new Intersection(false, false, this, line, 0, new Vector(0,0,0));
+            }
+        
+            if ((sol1 >= minDist && sol1 <= maxDist) && !(sol2>= minDist && sol2 <= maxDist)) //sol1 is valid
+            {
+                var xS1 = x0 + sol1 * dx;
+                var yS1 = y0 + sol1 * dy;
+                var zS1 = z0 + sol1 * dz; //coordinates with sol1 replaced
+                return new Intersection(true, true, this, line, sol1, this.Normal(new Vector(xS1, yS1, zS1)));
+            }
+            else if (!(sol1 >= minDist && sol1 <= maxDist) && (sol2>= minDist && sol2 <= maxDist)) //sol2 is valid
+            {
+                var xS2 = x0 + sol2 * dx;
+                var yS2 = y0 + sol2 * dy;
+                var zS2 = z0 + sol2 * dz; //coordinates with sol2 replaced
+                return new Intersection(true, true, this, line, sol2, this.Normal(new Vector(xS2, yS2, zS2)));
+            }
 
-            double x = v.X;
-            double y = v.Y;
-            double z = v.Z;
+            if (sol1 < sol2)
+            {
+                return new Intersection(true, true, this, line, sol1, this.Normal(new Vector()));
+            }
+            return new Intersection(true, true, this, line, sol2, this.Normal(new Vector()));
+            
+            
+        }
 
-            double nx = 2 * x / a2;
-            double ny = 2 * y / b2;
-            double nz = 2 * z / c2;
+        public Vector Normal(Vector v)
+        {
+            var x = v.X / SemiAxesLength.X;
+            var y = v.Y / SemiAxesLength.Y;
+            var z = v.Z / SemiAxesLength.Z;
 
-            Vector normal = new Vector(nx, ny, nz);
-            normal.Normalize(); // Ensure the normal vector is unit length
+            var h = Center.X / SemiAxesLength.X;
+            var j = Center.Y / SemiAxesLength.Y;
+            var k = Center.Z / SemiAxesLength.Z;
 
-            return normal;
+            var xx = 2 * (x - h) / 1.0;
+            var yy = 2 * (y - j) / 1.0;
+            var zz = 2 * (z - k) / 1.0;
+
+            return new Vector(xx, yy, zz).Normalize();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace rt
+namespace RayTracingWithEllipsoids
 {
     public class Image
     {

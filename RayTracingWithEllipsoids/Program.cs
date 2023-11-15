@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace rt
+﻿
+namespace RayTracingWithEllipsoids
 {
     public class Program
     {
@@ -40,7 +37,7 @@ namespace rt
                 new Ellipsoid(new Vector(  0.0,  10.0, 135.0), new Vector(0.5, 5.0, 5.0), 5.0, Color.CYAN),
                 new Ellipsoid(new Vector( 35.0, -25.0, 135.0), new Vector(5.0, 0.5, 5.0), 5.0, Color.MAGENTA),
                 
-                //new Ellipsoid(   new Vector(-25.0, -50.0,  75.0),                           25.0, Color.ORANGE)
+                new Sphere(new Vector(-25.0, -50.0,  75.0),25.0,Color.ORANGE)
             };
 
             var lights = new Light[]

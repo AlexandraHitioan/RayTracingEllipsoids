@@ -1,4 +1,4 @@
-﻿namespace rt
+﻿namespace RayTracingWithEllipsoids
 {
     public abstract class Geometry
     {
