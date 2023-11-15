@@ -100,7 +100,7 @@ namespace RayTracingWithEllipsoids
                                 if (vCamInter * reflLight > 0) //same here, but with specular
                                     lightColor += intersection.Geometry.Material.Specular * light.Specular * Math.Pow(vCamInter * reflLight, intersection.Geometry.Material.Shininess);
 
-                                lightColor *= light.Intensity; //amplyifying the color by intensity
+                                lightColor *= light.Intensity; //amplifying the color by intensity
                             }
 
                             pixelColor += lightColor;//we add the colors from the light sources to the overall color of the pixel
